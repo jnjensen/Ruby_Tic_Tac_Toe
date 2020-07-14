@@ -9,10 +9,8 @@ class Player
       $taken_token = token
       $player_count += 1
     end
-  
-    def move
-    end
   end
+  
   #users abilities -move (check valid), forfeift
   class GameBoard
     @@turn_number = 0
@@ -38,6 +36,75 @@ class Player
       puts "-----------"
       puts " #{@board[6]} | #{@board[7]} | #{@board[8]} "
     end
+  
+    def valid_move(move, board)
+      valid = false
+  
+      until valid
+        move -= 1
+  
+        if move < 0 || move > 8
+          puts "Invalid move!"
+          puts "where would you like to play (1 - 9)?"
+          move = gets.chomp.to_i
+        elsif @board[move] != " "
+          puts "Invalid move! That space is already taken!"
+          puts "where would you like to play (1 - 9)?"
+          move = gets.chomp.to_i
+        else
+          valid = true      
+        end
+      end
+  
+      move
+    end
+  
+    def winner(board)
+      winner = false
+      WIN_COMBINATIONS.each do |combo|
+        slots = [@board[combo[0]], @board[combo[1]], @board[combo[2]]]
+  
+        if !slots.include?(" ")
+          if slots[0] == slots[1] && slots[1] == slots [2] && slots[0] == slots[2]
+            return true
+          end
+        end
+      end
+      winner
+    end
+  
+    def check_game(name, board)
+      if !@board.include?(" ")
+        puts "Cat's game"
+        return true
+      elsif winner(board)
+        puts " "
+        puts "Congratulations! #{name} wins!"
+        return true
+      end
+    end
+  
+    def move(players, board)
+      game_over = false
+      puts " 1 | 2 | 3 "
+      puts "-----------"
+      puts " 4 | 5 | 6 "
+      puts "-----------"
+      puts " 7 | 8 | 9 "
+  
+      until game_over do
+        @@turn_number += 1
+        @@turn_number % 2 == 0 ? current_player = players[1] : current_player = players[0]
+  
+        puts "#{current_player.name}, where would you like to play (1 - 9)?"
+        move = gets.chomp.to_i
+        move = valid_move(move, board)
+        @board[move] = current_player.token.to_s
+        board.display_board
+        game_over = check_game(current_player.name, board)
+      end
+    end
+  
   end
   #board abilities -check (winner? draw? over?)
   
@@ -47,7 +114,7 @@ class Player
     until valid_choice do
       puts "Do you want to be X's or O's?"
       token_choice = gets.chomp.downcase
-      if token_choice == "x" || "o"
+      if token_choice == "x" || token_choice == "o"
         valid_choice = true
       else
         puts "Invalid Option!"
@@ -58,22 +125,14 @@ class Player
   end
   
   def create_player
-    if $player_count == 0
-      puts "Player 1, what is your name?"
-    else
-      puts "Player 2, what is your name?"
-    end
+    puts $player_count == 0 ? "Player 1, what is your name?" : "Player 2, what is your name?"
   
     name = gets.chomp.capitalize
   
     if $player_count == 0
       token = token_choice
     else 
-      if $taken_token == "X"
-        token = "O"
-      else
-        token = "X"
-      end
+      $taken_token == "X" ? token = "O" : token = "X"
     end
     
     player = Player.new(name, token)
@@ -81,12 +140,30 @@ class Player
   end
   
   def sort_players(play1, play2)
-    if play1.token == "X"
-      order = [play1, play2]
-    else
-      order = [play2, play1]
-    end
+    play1.token == "X" ? order = [play1, play2] : order = [play2, play1]
     order
+  end
+  
+  def play_new_game
+    answered = false
+    puts " "
+    puts " "
+  
+    until answered do
+      puts "Would you like to play again? (Y or N)"
+      answer = gets.chomp.upcase
+  
+      if answer == "Y"
+        puts " "
+        puts " "
+        game_play
+      elsif answer == "N"
+        $player_count = 0
+        answered = true
+      else
+        puts "Invalid response."
+      end
+    end
   end
   
   def game_play
@@ -96,6 +173,10 @@ class Player
     player_two = create_player
     play_order = sort_players(player_one, player_two)
     puts "X's go first. #{play_order[0].name}, it's your turn."
+    new_game.move(play_order, new_game)
+    play_new_game
+  
+  
   end
   
   game_play
