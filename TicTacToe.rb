@@ -91,6 +91,7 @@ class Player
       puts " 4 | 5 | 6 "
       puts "-----------"
       puts " 7 | 8 | 9 "
+      puts " "
   
       until game_over do
         @@turn_number += 1
@@ -101,6 +102,7 @@ class Player
         move = valid_move(move, board)
         @board[move] = current_player.token.to_s
         board.display_board
+        puts " "
         game_over = check_game(current_player.name, board)
       end
     end
@@ -119,6 +121,7 @@ class Player
       else
         puts "Invalid Option!"
       end
+      puts " "
     end
   
     token_choice.upcase
@@ -128,6 +131,7 @@ class Player
     puts $player_count == 0 ? "Player 1, what is your name?" : "Player 2, what is your name?"
   
     name = gets.chomp.capitalize
+    puts " "
   
     if $player_count == 0
       token = token_choice
